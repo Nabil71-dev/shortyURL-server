@@ -1,12 +1,14 @@
 const bcrypt = require('bcrypt');
-const Url = require('../model/url.model');
-const User = require('../model/user.model');
 const { createAnalytics } = require('../utils/analytics')
 const { generateAccessToken, generateToken, resetPassToken } = require('../middleware/auth');
+const { getOneUser, getAnyUser, createOneUser, updateOneUser } = require('../service/user.service');
+const { hashedPass } = require('../utils/hashing');
+const { getOneUsersActiveUrls, getOneUsersAllUrls } = require('../service/url.service');
 
 exports.getProfile = async (req, res, next) => {
     const { email } = req;
-    const user = await User.findOne({ email, status: true });
+
+    const user = await getOneUser({ email });
     if (!user) {
         return next('No user found')
     }
@@ -19,7 +21,8 @@ exports.getProfile = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email, status: true });
+
+    const user = await getOneUser({ email });
     if (!user) {
         return next('No user found')
     }
@@ -30,11 +33,11 @@ exports.login = async (req, res, next) => {
             const accessToken = generateAccessToken(email)
 
             return res.status(200).send({
-                message: "Login successful",
+                message: "Login successful.",
                 data: {
                     accessToken,
                     token,
-                    admin:user?.isAdmin,
+                    admin: user?.isAdmin,
                     expiresIn: 3600000 + Date.now()
                 }
             });
@@ -46,23 +49,23 @@ exports.login = async (req, res, next) => {
 
 exports.createUser = async (req, res, next) => {
     const { email, password } = req.body;
-    const olduser = await User.findOne({ email });
-    if (olduser) {
-        return next('User already exist')
+
+    const oldUser = await getAnyUser({ email });
+    if (oldUser) {
+        return next('User already exist.');
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    req.body.password = bcrypt.hashSync(password, salt);
+    req.body.password = await hashedPass(password);
 
-    const user = new User(req.body);
-
-    const newUser = await user.save()
+    const newUser = await createOneUser(req.body);
     if (!newUser) {
-        return next("Something went wrong");
+        return next("Something went wrong.");
     }
+
     createAnalytics("user");
+
     return res.status(200).send({
-        message: "User creation Success",
+        message: "User creation Success.",
         data: newUser
     });
 }
@@ -70,12 +73,13 @@ exports.createUser = async (req, res, next) => {
 //Request from user to reset pass using email
 exports.resetRequest = async (req, res, next) => {
     const { email } = req.body;
-    const user = await User.findOne({ email: email, status: true });
+    const user = await getOneUser({ email });
     if (!user) {
         return next('No user found')
     }
 
-    const resetToken = resetPassToken(email)
+    const resetToken = resetPassToken(email);
+
     return res.status(200).send({
         message: "User found!",
         data: {
@@ -87,37 +91,37 @@ exports.resetRequest = async (req, res, next) => {
 //Reset password
 exports.setUpPass = async (req, res, next) => {
     const { password } = req.body;
+    const { email } = req;
 
-    const user = await User.findOne({ email: req.email, status: true });
+    const user = await getOneUser({ email });
     if (!user) {
         return next('No user found')
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    req.body.password = bcrypt.hashSync(password, salt);
+    req.body.password = await hashedPass(password);
 
-    const data = await User.findOneAndUpdate({ email: req.email }, {
-        $set: { password: req.body.password },
-    }, { new: true })
-    if (data) {
-        return res.status(200).send({
-            message: "Your password successfully reseted, now you can login",
-        });
-    }
-    else {
+    const data = await updateOneUser({ email, password: req.body.password });
+    if (!data) {
         return next("Error, Try again later!");
     }
+
+    return res.status(200).send({
+        message: "Your password successfully reseted, now you can login.",
+    });
 }
 
 exports.refreshToken = async (req, res, next) => {
-    const user = await User.findOne({ email: req.email, status: true });
+    const { email } = req;
+
+    const user = await getOneUser({ email });
     if (!user) {
-        return next('No user found')
+        return next('No user found.');
     }
 
-    const accessToken = generateAccessToken(req.email)
+    const accessToken = generateAccessToken(req.email);
+
     return res.status(200).send({
-        message: "New access token",
+        message: "New access token.",
         data: {
             accessToken,
         }
@@ -126,31 +130,32 @@ exports.refreshToken = async (req, res, next) => {
 
 exports.usersState = async (req, res, next) => {
     const { userID } = req.params;
-    const user = await User.findOne({ email: req.email, status: true });
+    const { email } = req;
+
+    const user = await getOneUser({ email });
     if (!user) {
-        return next('No user found')
+        return next('No user found.');
     }
 
-    const usersData = await User.findOne({ userID });
+    const usersData = await getAnyUser({ userID });
     if (!usersData) {
         return next('No user found')
     }
 
-    const date = Date.now();
-    const usersUrls = await Url.find({ userIDs: { $elemMatch: { userID, expiresIn: { $gt: date } } } });
+    const usersUrls = await getOneUsersActiveUrls({userID})
     if (!usersUrls) {
-        return next('Somthing went wrong, try again later!')
+        return next('Somthing went wrong, try again later!');
     }
 
-    const count = await Url.find({ userIDs: { $elemMatch: { userID } } })
+    const count = await getOneUsersAllUrls({userID});
     if (!count) {
-        return next("Something went wrong");
+        return next("Something went wrong.");
     }
 
     return res.status(200).send({
-        message: "Users stats",
+        message: "Users stats.",
         data: {
-            totalUrls:count.length,
+            totalUrls: count.length,
             activeURLs: usersUrls.length,
             leftURLs: usersData?.dailyLimit
         }

@@ -1,9 +1,9 @@
-const express=require('express');
-const routes=express.Router()
-const mainUrlController=require('../controller/mainUrlController')
+const express = require('express');
+const routes = express.Router()
+const mainUrlController = require('../controller/mainUrl.controller')
 
-routes.get('/:shortenedurl',mainUrlController.getMainURL);
+routes.get('/:shortenedurl', mainUrlController.getMainURL);
 
-module.exports=routes;
+module.exports = routes;
 
 

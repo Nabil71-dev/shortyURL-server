@@ -1,31 +1,28 @@
-const Url = require('../model/url.model');
-const redis = require("redis")
+const redisconnection = require('../config/redis.connection');
+const { getUrlUsingShortened } = require('../service/url.service');
 
 //Get main url using sort url
 exports.getMainURL = async (req, res) => {
-    const client = await redis.createClient({
-        url: process.env.REDIS_URL
-    }).on('error', err => console.log('Redis Client Error', err)).connect();
-
+    const client = await redisconnection.redisConnection();
     const { shortenedurl } = req.params;
 
-    const cached = await client.get(`url-${shortenedurl}`)
+    const cached = await client?.get(`url-${shortenedurl}`)
     if (cached) {
         console.log("URL using from cache : ")
         const data = JSON.parse(cached);
         return res.redirect(`${data}`)
     }
 
-    const isExist = await Url.findOne({ userIDs: { $elemMatch: { shortenedurl } } });
+    const isExist = await getUrlUsingShortened({ shortenedurl });
     if (!isExist) {
         return res.redirect(`${process.env.CLIENT_URL}/not-found`)
     }
 
     let existFinal = false;
     for (let it = 0; it < isExist.userIDs.length; it++) {
-        if (isExist.userIDs[it].shortenedurl === shortenedurl) {
+        if (isExist?.userIDs[it]?.shortenedurl === shortenedurl) {
             const date = Date.now();
-            if (isExist.userIDs[it].expiresIn >= date) {
+            if (isExist?.userIDs[it]?.expiresIn >= date) {
                 client.set(`url-${shortenedurl}`, JSON.stringify(isExist.originalUrl), {
                     EX: 60,
                     NX: true
@@ -33,13 +30,12 @@ exports.getMainURL = async (req, res) => {
                 existFinal = true
                 break;
             }
-            else if(isExist.userIDs[it].expiresIn < date){
+            else if (isExist?.userIDs[it]?.expiresIn < date) {
                 console.log("URL expires")
                 existFinal = false;
                 break;
             }
-        }
-        else {
+        } else {
             continue;
         }
     }

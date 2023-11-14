@@ -1,16 +1,18 @@
 const User = require('../model/user.model')
 const Url = require('../model/url.model');
 const Analytics = require('../model/analytics.model');
-const underscore = require('underscore');
-
+const _ = require('underscore');
+const { getOneUser } = require('../service/user.service');
 
 exports.fixedNumbers = async (req, res, next) => {
-    const admin = await User.findOne({ email: req.email, status: true });
+    const {email}=req;
+
+    const admin = await getOneUser({email});
     if (!admin) {
         return next('User not found')
     }
 
-    let users = await User.find();
+    let users = await User.find({});
     if (!users) {
         return next('Somthing went wrong, try again later!')
     }
@@ -23,13 +25,12 @@ exports.fixedNumbers = async (req, res, next) => {
 
     let totalUsers = 0, totalUrls = 0, activeUrls = 0;
 
-    users = underscore.filter(users, user => user.isAdmin === false);
-    underscore.map(users, user => (
+    users = _.filter(users, user => !user?.isAdmin);
+    _.each(users, user => (
         totalUrls += user.urlCount,
         activeUrls += user.currentUrlCount
     ));
-
-    totalUsers = users.length;
+    totalUsers = users?.length;
 
     return res.status(200).send({
         message: "All number statistics",
@@ -41,7 +42,9 @@ exports.fixedNumbers = async (req, res, next) => {
 }
 
 exports.userYearData = async (req, res, next) => {
-    const admin = await User.findOne({ email: req.email, status: true });
+    const {email}=req;
+    
+    const admin = await getOneUser({email});
     if (!admin) {
         return next('User not found')
     }
@@ -58,7 +61,9 @@ exports.userYearData = async (req, res, next) => {
 }
 
 exports.urlsYearData = async (req, res, next) => {
-    const admin = await User.findOne({ email: req.email, status: true });
+    const {email}=req;
+    
+    const admin = await getOneUser({email});
     if (!admin) {
         return next('User not found')
     }
