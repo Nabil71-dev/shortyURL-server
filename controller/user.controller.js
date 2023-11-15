@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { createAnalytics } = require('../utils/analytics')
+const { createAnalytics } = require('../utils/analytics');
 const { generateAccessToken, generateToken, resetPassToken } = require('../middleware/auth');
 const { getOneUser, getAnyUser, createOneUser, updateOneUser } = require('../service/user.service');
 const { hashedPass } = require('../utils/hashing');
@@ -75,7 +75,7 @@ exports.resetRequest = async (req, res, next) => {
     const { email } = req.body;
     const user = await getOneUser({ email });
     if (!user) {
-        return next('No user found')
+        return next('No user found');
     }
 
     const resetToken = resetPassToken(email);
@@ -95,7 +95,7 @@ exports.setUpPass = async (req, res, next) => {
 
     const user = await getOneUser({ email });
     if (!user) {
-        return next('No user found')
+        return next('No user found');
     }
 
     req.body.password = await hashedPass(password);
@@ -139,10 +139,10 @@ exports.usersState = async (req, res, next) => {
 
     const usersData = await getAnyUser({ userID });
     if (!usersData) {
-        return next('No user found')
+        return next('No user found.');
     }
 
-    const usersUrls = await getOneUsersActiveUrls({userID})
+    const usersUrls = await getOneUsersActiveUrls({userID});
     if (!usersUrls) {
         return next('Somthing went wrong, try again later!');
     }

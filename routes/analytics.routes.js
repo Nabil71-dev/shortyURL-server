@@ -1,6 +1,6 @@
 const express = require('express');
-const routes = express.Router()
-const analyticsController = require('../controller/analytics.controller')
+const routes = express.Router();
+const analyticsController = require('../controller/analytics.controller');
 
 routes.get('/numbers', analyticsController.fixedNumbers);
 routes.get('/users', analyticsController.userYearData);

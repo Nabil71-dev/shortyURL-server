@@ -6,16 +6,16 @@ exports.getMainURL = async (req, res) => {
     const client = await redisconnection.redisConnection();
     const { shortenedurl } = req.params;
 
-    const cached = await client?.get(`url-${shortenedurl}`)
+    const cached = await client?.get(`url-${shortenedurl}`);
     if (cached) {
-        console.log("URL using from cache : ")
+        console.log("URL using from cache : ");
         const data = JSON.parse(cached);
-        return res.redirect(`${data}`)
+        return res.redirect(`${data}`);
     }
 
     const isExist = await getUrlUsingShortened({ shortenedurl });
     if (!isExist) {
-        return res.redirect(`${process.env.CLIENT_URL}/not-found`)
+        return res.redirect(`${process.env.CLIENT_URL}/not-found`);
     }
 
     let existFinal = false;
@@ -41,8 +41,8 @@ exports.getMainURL = async (req, res) => {
     }
 
     if (!existFinal) {
-        console.log("URL not found")
-        return res.redirect(`${process.env.CLIENT_URL}/not-found`)
+        console.log("URL not found");
+        return res.redirect(`${process.env.CLIENT_URL}/not-found`);
     }
-    return res.redirect(`${isExist.originalUrl}`)
+    return res.redirect(`${isExist.originalUrl}`);
 }

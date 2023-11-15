@@ -1,7 +1,7 @@
-const shortId = require('shortid')
+const shortId = require('shortid');
 const Url = require('../model/url.model');
 const axios = require('axios');
-const { createAnalytics } = require('../utils/analytics')
+const { createAnalytics } = require('../utils/analytics');
 const _ = require('underscore');
 const { getOneUser } = require('../service/user.service');
 const { originalUrlExist, updateUsersDataonCreation, createUrl, getOneUsersAllUrlsData, getAllUrls } = require('../service/url.service');
@@ -13,7 +13,7 @@ exports.shortUrlCreate = async (req, res, next) => {
 
     const user = await getOneUser({ email });
     if (!user) {
-        return next('User not found.')
+        return next('User not found.');
     }
 
     const { userID, dailyLimit } = user;
@@ -31,7 +31,7 @@ exports.shortUrlCreate = async (req, res, next) => {
                 return res.status(200).send({
                     message: 'Already exist',
                     data: isExist
-                })
+                });
             }
 
             isExist.userIDs.push(newShrotUrl);
@@ -50,7 +50,7 @@ exports.shortUrlCreate = async (req, res, next) => {
             return res.status(200).send({
                 message: 'Creation successfull',
                 data: newUserIdInsert
-            })
+            });
         }
 
         try {
@@ -90,23 +90,23 @@ exports.usersAllShortened = async (req, res, next) => {
 
     const user = await getOneUser({ email });
     if (!user) {
-        return next('User not found.')
+        return next('User not found.');
     }
 
     const usersUrls = await getOneUsersAllUrlsData({ userID, page, limit });
     if (!usersUrls) {
-        return next('Somthing went wrong, try again later!')
+        return next('Somthing went wrong, try again later!');
     }
 
     _.each(usersUrls, async (items) => {
         let replaceData = [];
         for (let it = 0; it < items?.userIDs?.length; it++) {
             if (items?.userIDs[it]?.userID == userID) {
-                replaceData?.push(items?.userIDs[it])
+                replaceData?.push(items?.userIDs[it]);
                 break;
             }
         }
-        items.userIDs = []
+        items.userIDs = [];
         items.userIDs = replaceData;
     });
 
@@ -124,15 +124,15 @@ exports.allShortened = async (req, res, next) => {
 
     const admin = await getOneUser({ email, isAdmin: true });
     if (!admin) {
-        return next('User not found')
+        return next('User not found');
     }
 
     let urls = await getAllUrls({ page, limit });
     if (!urls) {
-        return next('Somthing went wrong, try again later!')
+        return next('Somthing went wrong, try again later!');
     }
 
-    const count = await Url.find({})
+    const count = await Url.find({});
     if (!count) {
         return next("Something went wrong");
     }

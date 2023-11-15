@@ -8,10 +8,10 @@ const { updateOneUserByMail } = require('../service/user.service');
 exports.schedulerExpireUrl = async (req, res, next) => {
     let urls = await Url.find({});
     if (!urls) {
-        return next('Somthing went wrong, try again later!')
+        return next('Somthing went wrong, try again later!');
     }
 
-    console.log("Expires url updating")
+    console.log("Expires url updating");
     const date = Date.now();
     let flag1 = true;
 
@@ -38,18 +38,18 @@ exports.schedulerExpireUrl = async (req, res, next) => {
 
     const users = await User.find({});
     if (!users) {
-        return next('Somthing went wrong, try again later!')
+        return next('Somthing went wrong, try again later!');
     }
-    console.log("URL count updating, also updating daily limit.")
+    console.log("URL count updating, also updating daily limit.");
 
     let flag2 = true;
 
     _.each(users, async (user) => {
         const { userID } = user;
 
-        let usersUrls = await getOneUsersAllUrls({ userID })
+        let usersUrls = await getOneUsersAllUrls({ userID });
         if (!usersUrls) {
-            return next('Somthing went wrong, try again later!')
+            return next('Somthing went wrong, try again later!');
         }
 
         const newData = {

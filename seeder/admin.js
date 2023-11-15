@@ -24,8 +24,8 @@ mongoose
 
 user.map(async (u, index) => {
     try {
-        u.password = await hashedPass(u.password)
-        u.isAdmin = true
+        u.password = await hashedPass(u.password);
+        u.isAdmin = true;
 
         const savedAdmin = await u.save();
         console.log("Admin seeding done!!");

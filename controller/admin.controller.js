@@ -4,14 +4,14 @@ exports.getAllUsers = async (req, res, next) => {
     const { page = 0, limit = 10 } = req.query;
     const { email } = req;
 
-    const admin = await getOneUser({ email, isAdmin: true })
+    const admin = await getOneUser({ email, isAdmin: true });
     if (!admin) {
-        return next('No user found.')
+        return next('No user found.');
     }
 
-    const users = await getAllUser({ isAdmin: false, page, limit })
+    const users = await getAllUser({ isAdmin: false, page, limit });
     if (!users) {
-        return next('Somthing went wrong, try again later!')
+        return next('Somthing went wrong, try again later!');
     }
 
     const count = await countUser();
