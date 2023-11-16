@@ -13,7 +13,7 @@ npm start
 It's a simple URL shortner project which I created to utilize my recent learnings and tricks
 
 ## Features 
-**Current version**
+###### Current version
  * Token based auth (with access and refresh token)
  * SLS lemda function for URL validation check
  * URL create by user for fixed time
@@ -21,7 +21,7 @@ It's a simple URL shortner project which I created to utilize my recent learning
  * CRON-job to cover daily limit
  * User and URL manage from admin side
  * URL, user analytics 
-**Next version**
+###### Next version
  * custom alais set
  * Req limit
 
