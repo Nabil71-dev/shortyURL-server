@@ -3,19 +3,28 @@
 ## Add env
 * replace .env.example file to .env for firebase auth and other credentials
 
-## Install all the libraries and dependencies 
-* npm install
-
-### DB seed
+## Install all the libraries and dependencies and run
 ```bash
-admin seed
-* npm run admin:seed
-Run 
-* npm start
+npm install
+npm start
 ```
 
 ## Overview
 It's a simple URL shortner project which I created to utilize my recent learnings and tricks
+
+## Features 
+**Current version**
+ * Token based auth (with access and refresh token)
+ * SLS lemda function for URL validation check
+ * URL create by user for fixed time
+ * LRU cache for url access
+ * CRON-job to cover daily limit
+ * User and URL manage from admin side
+ * URL, user analytics 
+**Next version**
+ * custom alais set
+ * Req limit
+
 ###### Technologies and methologies
 * ExpressJs,
 * JWT, (access token & refresh token)
